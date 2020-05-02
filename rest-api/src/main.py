@@ -10,9 +10,6 @@ from dotenv import load_dotenv
 from models import init_models
 from routes import init_routes
 
-
-SQLALCHEMY_DATABASE_URI = 'postgresql://developer:FasraThuas@123!@localhost:5433/happy_things'
-
 def check_if_token_in_blacklist(decrypted_token):
     jti = decrypted_token['jti']
     return models.RevokedToken.is_jti_blacklisted(jti)
