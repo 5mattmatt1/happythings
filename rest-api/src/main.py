@@ -1,11 +1,15 @@
+import os
+
 from flask import Flask
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
-
 from flask_migrate import init, migrate, upgrade
+
+from dotenv import load_dotenv
 
 from models import init_models
 from routes import init_routes
+
 
 SQLALCHEMY_DATABASE_URI = 'postgresql://developer:FasraThuas@123!@localhost:5433/happy_things'
 
@@ -14,6 +18,9 @@ def check_if_token_in_blacklist(decrypted_token):
     return models.RevokedToken.is_jti_blacklisted(jti)
 
 def main():
+    load_dotenv()
+    SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI")
+
     app = Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
