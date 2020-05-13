@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 
 from models import init_models
 from routes import init_routes
+from sms import send_request
 
 def check_if_token_in_blacklist(decrypted_token):
     jti = decrypted_token['jti']
@@ -17,6 +18,9 @@ def check_if_token_in_blacklist(decrypted_token):
 def main():
     load_dotenv()
     SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI")
+    TWILIO_AC_SID = os.getenv("TWILIO_ACCOUNT_SID")
+    TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
+    TWILIO_PHONE_NUMBER = os.getenv("TWILIO_PHONE_NUMBER")
 
     app = Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
@@ -30,12 +34,8 @@ def main():
 
     init_models(app)
     init_routes(app)
-    # with app.app_context():
-    #     init()
-    #     migrate()
-    #     upgrade()
 
-    app.run()
+    app.run(debug=False)
 
 if __name__ == "__main__":
     main()
