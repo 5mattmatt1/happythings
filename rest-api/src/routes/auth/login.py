@@ -44,6 +44,7 @@ class Login(Resource):
         return jsonify({
             "login" : {
                 "access_token" : access_token,
-                "refresh_token" : refresh_token
+                "refresh_token" : refresh_token,
+                "user_id" : user.id
             }
         })
