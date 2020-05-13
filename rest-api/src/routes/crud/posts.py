@@ -10,7 +10,7 @@ import datetime
 import requests
 import models
 
-class Posts(Resource):
+class Post(Resource):
     delete_args = {"id": fields.Int(required=True)}
 
     @jwt_required

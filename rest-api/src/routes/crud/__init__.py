@@ -1,5 +1,5 @@
-from .posts import Posts
+from .posts import Post
 
 def init_crud(api):
     print("Init Auth")
-    api.add_resource(Posts, '/api/crud/posts')
+    api.add_resource(Post, '/api/crud/post')
