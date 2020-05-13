@@ -6,12 +6,19 @@ from passlib.hash import pbkdf2_sha256 as sha256
 migrate = Migrate()
 sa = SQLAlchemy()
 
-class User(sa.Model):
+class BaseModel:
+    @classmethod
+    def find_by_id(cls, id):
+        return cls.query.filter_by(id = id).first()
+
+# Authentication
+class User(sa.Model, BaseModel):
     __tablename__ = "user"
     
     id = sa.Column(sa.Integer, primary_key=True)
     username = sa.Column(sa.TEXT, unique=True, nullable=False)
     password = sa.Column(sa.TEXT, nullable=False)
+    partner_id = sa.Column(sa.Integer, sa.ForeignKey('user.id'))
 
     @classmethod
     def find_by_username(cls, username):
@@ -34,6 +41,23 @@ class RevokedToken(sa.Model):
     @classmethod
     def is_jti_blacklisted(cls, jti):
         return bool(cls.query.filter_by(jti = jti).first())
+
+# Posts
+class Post(sa.Model):
+    __tablename__ = "posts"
+    
+    id = sa.Column(sa.Integer, primary_key=True)
+    text = sa.Column(sa.TEXT, nullable=False)
+    poster_id = sa.Column(sa.Integer, sa.ForeignKey('user.id'))
+    recipient_id = sa.Column(sa.Integer, sa.ForeignKey('user.id'))
+    datetime = sa.Column(sa.TIMESTAMP, nullable=False)
+
+class Request(sa.Model):
+    __tablename__ = "requests"
+
+    id = sa.Column(sa.Integer, primary_key=True)
+    requester_id = sa.Column(sa.Integer, sa.ForeignKey('user.id'))
+    recipient_id = sa.Column(sa.Integer, sa.ForeignKey('user.id'))
 
 def init_models(app):
     sa.init_app(app)
