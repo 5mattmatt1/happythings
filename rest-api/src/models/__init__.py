@@ -11,6 +11,10 @@ class BaseModel:
     def find_by_id(cls, id):
         return cls.query.filter_by(id = id).first()
 
+    @classmethod
+    def all(cls):
+        return cls.query.all()
+
 # Authentication
 class User(sa.Model, BaseModel):
     __tablename__ = "user"
@@ -43,7 +47,7 @@ class RevokedToken(sa.Model):
         return bool(cls.query.filter_by(jti = jti).first())
 
 # Posts
-class Post(sa.Model):
+class Post(sa.Model, BaseModel):
     __tablename__ = "posts"
     
     id = sa.Column(sa.Integer, primary_key=True)

@@ -1,7 +1,7 @@
 from flask import request, jsonify
 
 from webargs import fields
-from webargs.flaskparser import use_args
+from webargs.flaskparser import use_kwargs
 
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -10,7 +10,29 @@ import datetime
 import requests
 import models
 
-class Post(Resource):
+class BasePostResource:
+    @staticmethod
+    def fmt_post(post):
+        return {
+            "id" : post.id,
+            "text" : post.text,
+            "poster_id" : post.poster_id,
+            "recipient_id" : post.recipient_id,
+            "datetime" : post.datetime.isoformat()
+        }
+
+class Posts(Resource, BasePostResource):
+    @jwt_required
+    def get(self):
+        posts = models.Post.all()
+        return jsonify(list(map(
+            self.fmt_post,
+            posts
+        )))
+
+
+class Post(Resource, BasePostResource):
+    get_args = {"id": fields.Int(required=True)}
     delete_args = {"id": fields.Int(required=True)}
 
     @jwt_required
@@ -63,8 +85,36 @@ class Post(Resource):
         models.sa.session.commit()
 
         return jsonify({})
-    
+
     @jwt_required
-    @use_args(delete_args)
+    @use_kwargs(get_args, location="query")
+    def get(self, id):
+        db_post = models.Post.find_by_id(id)
+        if db_post is None:
+            err_resp = jsonify({
+                "error" : {
+                    "message" : "No Post with ID: {}".format(id)
+                }
+            })
+            err_resp.status_code = requests.codes.NOT_FOUND
+            return err_resp
+
+        return jsonify(self.fmt_post(db_post))
+
+    @jwt_required
+    @use_kwargs(delete_args, location="query")
     def delete(self, id):
-        pass
+        db_post = models.Post.find_by_id(id)
+        if db_post is None:
+            err_resp = jsonify({
+                "error" : {
+                    "message" : "No Post with ID: {}".format(id)
+                }
+            })
+            err_resp.status_code = requests.codes.NOT_FOUND
+            return err_resp
+
+        models.sa.session.delete(db_post)
+        models.sa.session.commit()
+
+        return jsonify({})
