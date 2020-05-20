@@ -10,6 +10,8 @@ from dotenv import load_dotenv
 from models import init_models
 from routes import init_routes
 from sms import send_request
+# Named websocket to avoid collisions
+from websocket import socketio, init_socketio
 
 def check_if_token_in_blacklist(decrypted_token):
     jti = decrypted_token['jti']
@@ -26,6 +28,8 @@ def main():
     app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = 'some-secret-key'
+    # Fixes problem with flask-restful and flask-jwt-extended
+    app.config['PROPAGATE_EXCEPTIONS'] = True
 
     cors = CORS(app)
 
@@ -33,9 +37,10 @@ def main():
     jwt.token_in_blacklist_loader(check_if_token_in_blacklist)
 
     init_models(app)
-    init_routes(app)
+    api = init_routes(app)
+    init_socketio(app)
 
-    app.run(debug=False)
+    socketio.run(app, debug=False)
 
 if __name__ == "__main__":
     main()

@@ -5,24 +5,37 @@ from webargs.flaskparser import use_kwargs
 
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from websocket import socketio
 
 import datetime
 import requests
+import hashlib
+
 import models
 
 class BasePostResource:
     @staticmethod
     def fmt_post(post):
+        # TODO: Need to do a check that this ID exists and otherwise 400
+        user = models.User.find_by_id(post.poster_id)
+
         return {
             "id" : post.id,
             "text" : post.text,
-            "poster_id" : post.poster_id,
+            "poster" : {
+                "id" : post.poster_id,
+                "username" : user.username,
+                # Generate hash for gravatar on backend so that the e-mail isn't
+                # available for malicious scripts.
+                "email_hash" : hashlib.md5(user.email.lower().encode('utf-8')).hexdigest()
+            },
             "recipient_id" : post.recipient_id,
             "datetime" : post.datetime.isoformat()
         }
 
 class Posts(Resource, BasePostResource):
-    @jwt_required
+    decorators = [jwt_required]
+    
     def get(self):
         posts = models.Post.all()
         return jsonify(list(map(
@@ -32,10 +45,10 @@ class Posts(Resource, BasePostResource):
 
 
 class Post(Resource, BasePostResource):
+    decorators = [jwt_required]
     get_args = {"id": fields.Int(required=True)}
     delete_args = {"id": fields.Int(required=True)}
 
-    @jwt_required
     def post(self):
         # TODO: Look into alternatives of jwt_required for expired sessions.
         # jwt.exceptions.ExpiredSignatureError
@@ -84,9 +97,10 @@ class Post(Resource, BasePostResource):
         models.sa.session.add(db_post)
         models.sa.session.commit()
 
+        socketio.emit("new_post")
+
         return jsonify({})
 
-    @jwt_required
     @use_kwargs(get_args, location="query")
     def get(self, id):
         db_post = models.Post.find_by_id(id)
@@ -101,7 +115,6 @@ class Post(Resource, BasePostResource):
 
         return jsonify(self.fmt_post(db_post))
 
-    @jwt_required
     @use_kwargs(delete_args, location="query")
     def delete(self, id):
         db_post = models.Post.find_by_id(id)
@@ -116,5 +129,7 @@ class Post(Resource, BasePostResource):
 
         models.sa.session.delete(db_post)
         models.sa.session.commit()
+
+        socketio.emit("rm_post")
 
         return jsonify({})

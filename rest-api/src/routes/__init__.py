@@ -11,3 +11,4 @@ def init_routes(app):
     api = Api(app)
     init_auth(api)
     init_crud(api)
+    return api

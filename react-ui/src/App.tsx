@@ -2,9 +2,12 @@ import React from 'react';
 import logo from './logo.svg';
 import './App.css';
 
-import { Button } from '@material-ui/core';
+import { Button, MuiThemeProvider, makeStyles, CssBaseline } from '@material-ui/core';
+
 import Home from './home';
 import SignIn from './sign-in';
+import { lightTheme, darkTheme } from './theme';
+
 import dotenv from 'dotenv';
 
 import { BrowserRouter, Switch } from 'react-router-dom';
@@ -17,6 +20,7 @@ function App() {
   // {
   //   throw result.error;
   // }
+
 
   const requireLogin = (to: any, from: any, next: any) => {
     if (to.meta.auth) {
@@ -35,18 +39,20 @@ function App() {
   };
 
   return (
-    <div className="App">   
-      <BrowserRouter>   
-        {
-          // loading={Loading} error={NotFound}
-        }
-        <GuardProvider guards={[requireLogin]}>
-          <Switch>
-            <GuardedRoute path="/login" exact component={SignIn} />
-            <GuardedRoute path="/" exact component={Home} meta={{ auth: true }} />
-          </Switch>
-        </GuardProvider>
-      </BrowserRouter>
+    <MuiThemeProvider theme={lightTheme}>
+      <CssBaseline />
+      <div className="App">
+        <BrowserRouter>   
+          {
+            // loading={Loading} error={NotFound}
+          }
+          <GuardProvider guards={[requireLogin]}>
+            <Switch>
+              <GuardedRoute path="/login" exact component={SignIn} />
+              <GuardedRoute path="/" exact component={Home} meta={{ auth: true }} />
+            </Switch>
+          </GuardProvider>
+        </BrowserRouter>
       {/* <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <Button color="primary">Hello World</Button>
@@ -62,7 +68,8 @@ function App() {
           Learn React
         </a>
       </header> */}
-    </div>
+      </div>
+    </MuiThemeProvider>
   );
 }
 

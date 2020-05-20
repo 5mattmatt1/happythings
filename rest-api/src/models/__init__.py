@@ -23,6 +23,7 @@ class User(sa.Model, BaseModel):
     username = sa.Column(sa.TEXT, unique=True, nullable=False)
     password = sa.Column(sa.TEXT, nullable=False)
     partner_id = sa.Column(sa.Integer, sa.ForeignKey('user.id'))
+    email = sa.Column(sa.TEXT)
 
     @classmethod
     def find_by_username(cls, username):

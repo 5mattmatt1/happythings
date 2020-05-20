@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
-import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -28,6 +27,9 @@ function Copyright() {
 
 // TODO: Might move this to a hooks directory
 const useStyles = makeStyles((theme) => ({
+  container: {
+    backgroundColor: theme.palette.background.default
+  },
   paper: {
     marginTop: theme.spacing(8),
     display: 'flex',
@@ -100,8 +102,7 @@ export default function SignIn() {
   }
 
   return (
-    <Container component="main" maxWidth="xs">
-      <CssBaseline />
+    <Container component="main" maxWidth="xs" className={classes.container}>
       <div className={classes.paper}>
         <Avatar className={classes.avatar}>
           <LockOutlinedIcon />

@@ -6,6 +6,7 @@ class Refresh(Resource):
     @jwt_refresh_token_required
     def post(self):
         current_user = get_jwt_identity()
+        # NOTE: Do I need to generate a new refresh token as well?
         access_token = create_access_token(identity=current_user)
         return jsonify({
             "refresh" : {
